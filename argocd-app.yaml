@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-web-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    path: apps/demo-app
+    repoURL: 'https://github.com/ligum/k8s-gitops-manifests.git'
+    targetRevision: HEAD
+    path: apps/demo-app
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
