@@ -5,11 +5,14 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout app code
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Log in to Docker Hub
@@ -18,36 +21,36 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract Short SHA
-        id: vars
-        run: echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Build and Push Docker image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/demo-web:${{ env.SHA_SHORT }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/demo-web:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/demo-app:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/demo-app:${{ github.sha }}
 
   update-gitops-manifest:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout GitOps Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          repository: 'ligum/k8s-gitops-manifests'
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
-      - name: Update Image Tag in Deployment
+      - name: Update image tag in K8s manifest
         run: |
-          SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)
-          sed -i "s|image: .*demo-web:.*|image: ${{ secrets.DOCKERHUB_USERNAME }}/demo-web:${SHA_SHORT}|g" apps/demo-app/deployment.yaml
-          
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          sed -i "s|image: .*|image: ${{ secrets.DOCKERHUB_USERNAME }}/demo-app:${{ github.sha }}|g" apps/demo-app/deployment.yaml
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add apps/demo-app/deployment.yaml
-          git commit -m "ci: update image tag to ${SHA_SHORT} [skip ci]"
-          git push
+          git commit -m "ci: update image tag to ${{ github.sha }}" || exit 0
+          git push https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
