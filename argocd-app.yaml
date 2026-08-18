@@ -6,7 +6,6 @@ metadata:
 spec:
   project: default
   source:
-    path: apps/demo-app
     repoURL: 'https://github.com/ligum/k8s-gitops-manifests.git'
     targetRevision: HEAD
     path: apps/demo-app
