@@ -28,8 +28,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.ligum }}/demo-web:${{ env.SHA_SHORT }}
-            ${{ secrets.ligum }}/demo-web:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/demo-web:${{ env.SHA_SHORT }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/demo-web:latest
 
   update-gitops-manifest:
     needs: build-and-push
