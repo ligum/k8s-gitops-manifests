@@ -41,7 +41,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update image tag in K8s manifest
         run: |
@@ -53,4 +53,4 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add apps/demo-app/deployment.yaml
           git commit -m "ci: update image tag to ${{ github.sha }}" || exit 0
-          git push https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+          git push
