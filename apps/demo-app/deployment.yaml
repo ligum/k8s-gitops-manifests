@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
       - name: web
-        image: ligum/demo-app:6f3bd37b10b5d62a136f11c6b8ceb8ea07f1bc6a
+        image: ligum/demo-app:f9d9e7c4538f28c9d05bdf55d77dccb011670c78
         ports:
         - containerPort: 80
