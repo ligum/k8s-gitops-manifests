@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
       - name: web
-        image: nginxdemos/hello
+        image: ligum/demo-app:0b0c7074f6566f9ea764ec03d2f69294bf08379c
         ports:
         - containerPort: 80
